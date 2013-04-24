@@ -1,0 +1,250 @@
+set nocompatible
+filetype off
+
+" Color Settings {
+set colorcolumn=81  "colorcolumn
+" hi ColorColumn ctermbg=lightgrey guibg=lightgrey
+set t_Co=256
+set background=dark
+set cursorline
+" set cursorcolumn
+set ttyfast
+set ruler
+set backspace=indent,eol,start
+" colorscheme solarized
+colorscheme desert
+
+let g:solarized_termtrans = 1
+let g:solarized_termcolors = 256
+let g:solarized_contrast = "high"
+let g:solarized_visibility = "high"
+"}
+
+" tab settings {
+set tabstop=4
+set shiftwidth=4
+set softtabstop=4
+set expandtab
+"}
+
+set fileencodings=utf-8,gb18030,big5,latin1,euc-jp,euc-kr,ucs-bom
+set scrolloff=3
+set fenc=utf-8
+set autoindent
+set hidden
+"set encoding=utf-8
+
+"set laststatus=2
+set number
+"set undofile
+"set unwrap		" 禁止自动换行
+autocmd! bufwritepost _vimrc source % "自动载入配置文件不需要启动
+
+"set ralativenumber
+set wrap
+set isk+=-	" 将-连字符也设置为单词
+
+set ignorecase
+set smartcase
+set incsearch
+set showmatch
+set hlsearch
+
+set numberwidth=4
+
+set whichwrap=b,s,<,>,[,]	" 让退格，空格，上下箭头到行首行尾时自动移到下一行
+
+" 插入模式下移动
+inoremap <c-j> <down>
+inoremap <c-k> <up>
+inoremap <c-l> <right>
+inoremap <c-h> <left>
+
+"修改leader键为逗号
+"let maplearder=,
+imap jj <esc>
+
+inoremap <F1> <ESC>
+nnoremap <F1> <ESC>
+vnoremap <F1> <ESC>
+
+"Waldon setting {
+set tabstop=4
+set shiftwidth=4
+set autoindent
+set smartindent
+set wildmenu
+set backspace=indent,eol,start
+
+"======== 状态栏相关 ==========
+set laststatus=2 "总是显示状态栏status line
+set ruler "在编辑过程中，右下角显示光表位置的状态行
+set statusline=[%F]%y%r%m%*%=[Line:%l/%L,Column:%c][%p%%]
+
+set autowrite "在切换buffer时自动保存当前的文件
+set autoread
+
+"======== Encoding ===========
+set fileencodings=utf-8,gb2312,gbk,gb18030
+set termencoding=utf-8
+set encoding=utf-8
+
+set helplang=cn
+
+set tags=tags
+set tags+=./../tags
+set tags+=./*/tags
+set tags+=/usr/include/tags
+set tags+=/home/waldon/app/pin-2.12/source/tags
+
+"============= .c <-> .h ==========
+nnoremap <silent> <F12> :A<CR>
+
+"============ vim grep ============
+nnoremap <silent> <F3> :Grep<CR>
+"}
+
+"Vundle setting {
+set rtp+=~/.vim/bundle/vundle/
+call vundle#rc()
+
+" let Vundle manage Vundle
+" required!
+Bundle 'gmarik/vundle'
+
+Bundle 'taglist.vim'
+let Tlist_Ctags_Cmd='/usr/bin/ctags'	"指定Exuberant ctags程序的位置
+let Tlist_AutoOpen=1		"自动打开taglist窗口
+let Tlist_Show_One_File=1	"不同时显示多个文件的tag，只显示当前文件的
+let Tlist_Exit_OnlyWindow=1	"如果taglist窗口是最后一个窗口，则退出vim
+let Tlist_Inc_Winwidth=0	"终端下不支持窗口增大
+let Tlist_Use_Right_Window = 1	"在右侧窗口中显示taglist窗口
+"let Tlist_Sort_Type=name	"使taglist以tag名字进行排序
+let Tlist_Close_On_Select = 1	"选择了tag后自动关闭taglist窗口
+let Tlist_File_Fold_Auto_Close=1	"当同时显示多个文件中的tag时，只显示当前文件tag，其它文件的tag都被折叠起来
+let Tlist_GainFocus_On_ToggleOpen = 1	"打开taglist窗口时，输入焦点在taglist窗口中
+map <silent> tl :TlistToggle<cr>
+
+Bundle 'vimwiki'
+Bundle 'winmanager'
+let g:winManagerWindowLayout='FileExplorer|Taglist'
+" Bundle 'bufexplore.zip'
+
+" vim-scripts repos
+Bundle 'ctrlp.vim'
+
+" 当输入(),"",等需要匹配的符号时，自动补全剩余半个
+" Bundle 'AutoClose'
+
+Bundle 'ZenCoding.vim'
+
+" 在()、""、HTML标签之间快速跳转
+Bundle 'matchit.zip'
+
+" 显示行末的空格
+Bundle 'ShowTrailingWhitespace'
+
+" JS代码格式化插件
+Bundle '_jsbeautify'
+
+" 以全新的方式在文档中更高效地移动光标
+Bundle 'EasyMotion'
+let g:EasyMotion_leader_key = '<leader><learder>'
+
+" 自动识别文字编码
+Bundle 'FencView.vim'
+let g:fencview_autodetect=1
+
+" 在vim的编辑窗口树状显示文件目录
+" :NERDTree
+" :h NERDTree
+Bundle 'The-NERD-tree'
+nmap wm :NERDTree<CR>
+
+" NERD出品的快速给代码加注释的插件，选中，‘ctrl+h‘即可注释多种语言代码
+" n\cu  为光标以下n行取消注释
+" n\cm  为光标以下n行添加块注释
+" :h NERDCommenter
+Bundle 'The-NERD-Commenter'
+
+" 简单配置就可以按照自己的风格快速输入大段代码
+" Bundle 'UltiSnips'
+
+" 让代码更加易于纵向排版，以=或,符号对齐
+Bundle 'Tabular'
+
+" 自动补全插件
+" Bundle 'Valloric/YouCompleteMe'
+Bundle 'OmniCppComplete'
+Bundle 'AutoComplPop'
+
+Bundle 'L9'
+Bundle "VimIM"
+
+" FuzzyFinder 文件查找利器
+Bundle 'FuzzyFinder'
+
+" 快速浏览和操作buffer
+Bundle 'minibufexpl.vim'
+let g:miniBufExplMapCTabSwitchBufs=1
+let g:miniBufExplMapWindowNavVim = 1	"可以用<C-­h,j,k,l>切换到上下左右的窗口中
+let g:miniBufExplMapWindowNavArrows = 1	"可以用<C­箭头键>切换到上下左右窗口中去
+
+" }
+
+"============= .c <-> .h ==========
+nnoremap <silent> <F12> :A<CR>
+
+"============ vim grep ============
+nnoremap <silent> <F3> :Grep<CR>
+
+filetype plugin indent on " required!
+syntax on
+
+"--------------------------------------------------
+function! RemoveSpaceEndOfLine()
+    let cur_line = line('.')
+    let cur_col = col('.')
+    %s/\s\+$//g
+    call cursor(cur_line, cur_col)
+endfunction
+nmap <silent> ;m :call RemoveSpaceEndOfLine()<CR>
+
+function! ToggleSyntax()
+    if exists("g:syntax_on")
+        syntax off
+    else
+        syntax enable
+    endif
+endfunction
+" nmap: normal-mode key mapping
+nmap <silent> ;s :call ToggleSyntax()<CR>
+nmap <silent> ;w :w<CR>
+
+function! CapitalizeCenterAndMoveDown()
+    s/\<./\u&/g "Built-in substitution captializes each word
+    center
+    +1          "Built-in relative motion
+endfunction
+nmap <silent> \c :call CapitalizeCenterAndMoveDown()<CR>
+
+imap <silent> <C-D><C-D> <C-R>=strftime("%b%e %Y")<CR>
+imap <silent> <C-T><C-T> <C-R>=strftime("%l:%M%p")<CR>
+
+imap <silent> <C-C><C-C> <C-R>=string(eval(input("Calculate: ")))<CR>
+
+"Locate and return character 'above' current cursor position
+function! LookUpwards()
+    "Locate current column and preceding line from which to copy
+    let column_num = virtcol('.')
+    let target_pattern = '\%' . column_num . 'v.'
+    let target_line_num = search(target_pattern . '*\S', 'bnW')
+
+    if !target_line_num
+        return ""
+    else
+        return matchstr(getline(target_line_num), target_pattern)
+    endif
+endfunction
+"Reimplement CTRL-Y within insert mode
+imap <silent> <C-Y> <C-R><C-R>=LookUpwards()<CR>
