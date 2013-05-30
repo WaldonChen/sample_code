@@ -20,9 +20,9 @@ let mapleader=','
 " Map jj to <ESC> in insert mode
 imap jj <esc>
 
-
 " Fast saving
 nmap <leader>w :w!<CR>
+
 
 "===========================================
 " VIM user interface
