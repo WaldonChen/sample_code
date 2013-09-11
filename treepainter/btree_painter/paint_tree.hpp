@@ -1,7 +1,7 @@
 #ifndef _BTREEPAINTER_BPAINTERTREE_H_
 #define _BTREEPAINTER_BPAINTERTREE_H_
 
-#include "btree.h"
+#include "btree.hpp"
 
 #include <iostream>
 #include <ostream>
@@ -10,7 +10,7 @@
 using std::string;
 using std::ostream;
 
-namespace btreepainter
+namespace btree_painter
 {
 
 enum SonRole
@@ -24,153 +24,303 @@ enum SonRole
 enum FatherRole
 {
 	FATHER_ROLE_NONE,
-	HAS_LEFT,
-	HAS_RIGHT,
+	ONLY_LEFT,
+	ONLY_RIGHT,
 	HAS_BOTH,
 	HAS_NOCHILD
 };
 
-/**
- * Point
+const int kInvalidPositionValue = -1;
+
+/** Position
  */
-class Point
+class Position
 {
 public:
-	Point() : x(-1), y(-1) {}
-	Point(const int _x, const int _y) : x(_x), y(_y) {}
-	~Point() {}
+	Position() : x(kInvalidPositionValue), y(kInvalidPositionValue) {}
+	Position(const int _x, const int _y) : x(_x), y(_y) {}
+	~Position() {}
 
-	Point operator+(const Point &p2);
+	Position operator+(const Position &p2);
 
 public:
-	int x, y;
+	/** coordinate in horizontal direction */
+	int x;
+
+	/** coordinate in vertical direction */
+	int y;
 };
 
-bool operator==(const Point &p1, const Point &p2);
-std::ostream& operator<<(std::ostream &os, const Point &p);
+const Position kInvalidPosition(kInvalidPositionValue, kInvalidPositionValue);
 
-const Point INVALID_POINT(-1, -1);
+bool operator==(const Position &p1, const Position &p2)
+{
+	if (p1.x == p2.x && p1.y == p2.y)
+	{
+		return true;
+	}
+	return false;
+}
 
-/**
- * BPaintTreeInfo
+bool operator!=(const Position &p1, const Position &p2)
+{
+	return !(p1 == p2);
+}
+
+/** overrides operator '+' of Position
+ *
+ * @param p2 the additional position
+ *
+ * @return A new position
  */
-class BPaintTreeInfo
+Position Position::operator+(const Position &p2)
+{
+	if (*this == kInvalidPosition || p2 == kInvalidPosition)
+	{
+		return kInvalidPosition;
+	}
+	Position p1(x + p2.x, y + p2.y);
+	return p1;
+}
+
+std::ostream& operator<<(std::ostream &os, const Position &p)
+{
+	os << "(" << p.x << ", " << p.y << ")";
+	return os;
+}
+
+/** The infomation of a binary tree node that be painted.
+ */
+class PaintTreeInfo
 {
 public:
-	BPaintTreeInfo();
-	~BPaintTreeInfo() { }
+	PaintTreeInfo();
+	~PaintTreeInfo() { }
 
-	void CalcuNodeSizeAndSonLocation(const BPaintTreeInfo *left,
-							const BPaintTreeInfo *right);
-	// string toString();
+	void CalculatePaintTreeInfo(const PaintTreeInfo *left,
+							const PaintTreeInfo *right);
 
-	/** getter */
-	inline enum SonRole getSonRole() const { return sonRole; }
-	inline enum FatherRole getFatherRole() const { return fatherRole; }
-	inline int getWidth() const { return width; }
-	inline int getHeight() const { return height; }
-	inline int getSubTreeWidth() const { return subTreeWidth; }
-	inline int getSubTreeHeight() const { return subTreeHeight; }
-	inline Point getLocationLeft() const { return locationLeft; }
-	inline Point getLocationRight() const { return locationRight; }
-	inline const string& getName() const { return name; }
-
-	/** setter */
-	inline void setSonRole(const enum SonRole role) { sonRole = role; }
-	inline void setFatherRole(const enum FatherRole role) { fatherRole = role; }
-	inline void setWidth(const int w) { width = w; }
-	inline void setHeight(const int h) { height = h; }
-	inline void setSubTreeWidth(const int sw) { subTreeWidth = sw; }
-	inline void setSubTreeHeight(const int sh) { subTreeHeight = sh; }
-	inline void setLocationLeft(const Point &pt) { locationLeft = pt; }
-	inline void setLocationRight(const Point &pt) { locationRight = pt; }
-	inline void setName(const string& str) { name = str; }
-
-private:
+public:
 	/** The role of this node as a son. */
-	enum SonRole sonRole;
+	enum SonRole son_role_;
 
 	/** The role of this node as parent. */
-	enum FatherRole fatherRole;
+	enum FatherRole father_role_;
 
 	/** The width and height of this node. */
-	int width, height;
+	int width_, height_;
 
-	/** The width and height of the subTreeWidth
+	/** The width and height of the subtree_width_
 	 * which consist of this node and it's sons.
 	 */
-	int subTreeWidth, subTreeHeight;
+	int subtree_width_, subtree_height_;
 
 	/** Related location of left and right son in the subtree */
-	Point locationLeft, locationRight;
+	Position left_subtree_location_, right_subtree_location_;
 
-	/** The string of the BPaintTreeNode display on the canvas. */
-	string name;
+	/** The string of the PaintTreeNode display on the canvas. */
+	string name_;
 };
 
-ostream &operator<<(ostream &os, const BPaintTreeInfo &info);
+typedef BTreeNode<PaintTreeInfo> PaintTreeNode;
+typedef PaintTreeNode *PaintTree;
 
-typedef BTreeNode<BPaintTreeInfo> BPaintTreeNode;
-typedef BPaintTreeNode *BPaintTree;
+PaintTreeInfo::PaintTreeInfo()
+	: son_role_(SON_ROLE_NONE), father_role_(FATHER_ROLE_NONE),
+	  width_(0), height_(0), subtree_width_(0), subtree_height_(0),
+	  left_subtree_location_(kInvalidPosition),
+	  right_subtree_location_(kInvalidPosition)
+{
+}
 
+ostream &operator<<(ostream &os, const PaintTreeInfo &info)
+{
+	os << "Node: " << info.name_ << " SonRole: " << info.son_role_
+		<< " FatherRole: " << info.father_role_ << " (W,H): ("
+		<< info.width_ << ", " << info.height_ << ") (W,H)': ("
+		<< info.subtree_width_ << ", " << info.subtree_height_
+		<< ") LocLeft: " << info.left_subtree_location_ << " LocRight: "
+		<< info.right_subtree_location_;
+	return os;
+}
+
+void CalculateStringSize(const string &str, int &width, int &height);
+
+/** Calculate the PaintTreeInfo of this node with their children.
+ *
+ * @param left left subtree
+ * @param right right subtree
+ */
+void PaintTreeInfo::CalculatePaintTreeInfo(const PaintTreeInfo *left,
+							const PaintTreeInfo *right)
+{
+	int left_width, left_height, right_width, right_height;
+	int l = 2, lr_width;
+
+	// Get size of subtrees.
+	left_width = left == NULL ? 0 : left->subtree_width_;
+	left_height = left == NULL ? 0 : left->subtree_height_;
+	right_width = right == NULL ? 0 : right->subtree_width_;
+	right_height = right == NULL ? 0 : right->subtree_height_;
+
+	// Calculate 'name_' size.
+	CalculateStringSize(name_, width_, height_);
+
+	// Size of current node.
+	width_ = (width_ | 0x01) + 2;
+	height_ += 2;
+
+	// Current node is leaf.
+	if (left == NULL && right == NULL)
+	{
+		subtree_width_ = width_;
+		subtree_height_ = height_;
+		left_subtree_location_ = kInvalidPosition;
+		right_subtree_location_ = kInvalidPosition;
+		return;
+	}
+
+	if (!((left_width + right_width) & 0x01))
+	{
+		l = 1;
+	}
+	lr_width = left_width + right_width + l;
+
+	left_subtree_location_.y = height_ + 1;
+	right_subtree_location_.y = height_ + 1;
+	left_subtree_location_.x = 0;
+	right_subtree_location_.x = left_width + l;
+	if (width_ > lr_width)
+	{
+		left_subtree_location_.x += (width_ - lr_width) >> 1;
+		right_subtree_location_.x += left_subtree_location_.x;
+	}
+	subtree_width_ = std::max(width_, lr_width);
+	subtree_height_ = std::max(left_height, right_height) + height_ + 1;
+
+	if (left != NULL && right == NULL)
+	{
+		right_subtree_location_ = kInvalidPosition;
+	}
+	else if (left == NULL && right != NULL)
+	{
+		left_subtree_location_ = kInvalidPosition;
+	}
+}
+
+/** Calculate the width and height of a string.
+ *
+ * @param str the string be calculated
+ * @param[out] width width of the 'str'
+ * @param[out] height height of the 'str'
+ */
+void CalculateStringSize(const string &str, int &width, int &height)
+{
+	int max_width = 0;
+	int cur_width = 0;
+	int lines = 1;
+	int str_len = str.length();
+	string::size_type i;
+
+	for (i = 0; i < str_len; ++i)
+	{
+		if (str[i] == '\n')
+		{
+			lines++;
+			if (max_width < cur_width)
+			{
+				max_width = cur_width;
+			}
+			cur_width = 0;
+		}
+		cur_width++;
+	}
+	height = lines;
+	width = std::max(cur_width, max_width);
+}
+
+/** Actual implementation of BuildPaintTree().
+ *
+ * @tparam T
+ * @param[out] bpt the paint tree generated
+ * @param[in] bt the binary tree be painted
+ */
 template <typename T>
-void BuildBPaintTreeImpl(BPaintTree &bpt, T *bt)
+void BuildPaintTreeImpl(PaintTree &bpt, const T *bt)
 {
 	if (bt == NULL)
 	{
 		return;
 	}
 
-	bpt = new BPaintTreeNode();
+	bpt = new PaintTreeNode();
 
-	BuildBPaintTreeImpl(bpt->left, bt->left);
-	BuildBPaintTreeImpl(bpt->right, bt->right);
+	BuildPaintTreeImpl(bpt->left_, bt->get_left());
+	BuildPaintTreeImpl(bpt->right_, bt->get_right());
 
-	BPaintTreeInfo bpt_info = BPaintTreeInfo();
-	bpt_info.setName(bt->getName());
+	PaintTreeInfo bpt_info = PaintTreeInfo();
+	bpt_info.name_ = bt->get_name();
 
-	if (bpt->left != NULL && bpt->right != NULL)
+	if (bpt->left_ != NULL && bpt->right_ != NULL)
 	{
-		bpt_info.setFatherRole(HAS_BOTH);
-		bpt->left->getData().setSonRole(LEFT_SON);
-		bpt->right->getData().setSonRole(RIGHT_SON);
-		bpt_info.CalcuNodeSizeAndSonLocation(&(bpt->left->getData()),
-					&(bpt->right->getData()));
+		bpt_info.father_role_ = HAS_BOTH;
+		bpt->left_->get_data().son_role_ = LEFT_SON;
+		bpt->right_->get_data().son_role_ = RIGHT_SON;
+		bpt_info.CalculatePaintTreeInfo(&(bpt->left_->get_data()),
+					&(bpt->right_->get_data()));
 	}
-	else if (bpt->left != NULL && bpt->right == NULL)
+	else if (bpt->left_ != NULL && bpt->right_ == NULL)
 	{
-		bpt_info.setFatherRole(HAS_LEFT);
-		bpt->left->getData().setSonRole(LEFT_SON);
-		bpt_info.CalcuNodeSizeAndSonLocation(&(bpt->left->getData()), NULL);
+		bpt_info.father_role_ = ONLY_LEFT;
+		bpt->left_->get_data().son_role_ = LEFT_SON;
+		bpt_info.CalculatePaintTreeInfo(&(bpt->left_->get_data()),
+										NULL);	// right child is NULL
 	}
-	else if (bpt->left == NULL && bpt->right != NULL)
+	else if (bpt->left_ == NULL && bpt->right_ != NULL)
 	{
-		bpt_info.setFatherRole(HAS_RIGHT);
-		bpt->right->getData().setSonRole(RIGHT_SON);
-		bpt_info.CalcuNodeSizeAndSonLocation(NULL, &(bpt->right->getData()));
+		bpt_info.father_role_ = ONLY_RIGHT;
+		bpt->right_->get_data().son_role_ = RIGHT_SON;
+		bpt_info.CalculatePaintTreeInfo(NULL, // left child is NULL
+										&(bpt->right_->get_data()));
 	}
 	else
 	{
-		bpt_info.setFatherRole(HAS_NOCHILD);
-		bpt_info.CalcuNodeSizeAndSonLocation(NULL, NULL);
+		bpt_info.father_role_ = HAS_NOCHILD;
+		bpt_info.CalculatePaintTreeInfo(NULL, NULL);
 	}
 
-	bpt->setData(bpt_info);
+	bpt->set_data(bpt_info);
 }
 
-/**
- * Build the BPaintTree of a BTree
+/** Build the PaintTree of a BTree.
+ *
+ * @tparam T
+ * @param bpt the paint tree generated
+ * @param bt the binary tree be painted
  */
 template <typename T>
-void BuildBPaintTree(BPaintTree &bpt, T *bt)
+void BuildPaintTree(PaintTree &bpt, T *bt)
 {
-	BuildBPaintTreeImpl(bpt, bt);
+	BuildPaintTreeImpl(bpt, bt);
 	if (bpt != NULL)
 	{
-		bpt->getData().setSonRole(ROOT);
+		bpt->get_data().son_role_ = ROOT;
 	}
 }
 
-void CalcuStringSize(const string &str, int &width, int &height);
+void DestoryPaintTree(PaintTree &bpt)
+{
+	if (bpt == NULL)
+	{
+		return;
+	}
+
+	DestoryPaintTree(bpt->left_);
+	DestoryPaintTree(bpt->right_);
+
+	delete bpt;
+	bpt = NULL;
+}
+
 };
 #endif

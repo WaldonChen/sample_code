@@ -1,8 +1,8 @@
 #ifndef _BTREEPAINTER_H_
 #define _BTREEPAINTER_H_
 
-#include "bpainttree.h"
-#include "canvas.h"
+#include "paint_tree.hpp"
+#include "canvas.hpp"
 
 #include <string>
 #include <sstream>
@@ -10,19 +10,20 @@
 using std::string;
 using std::ostringstream;
 
-namespace btreepainter
+namespace btree_painter
 {
 
 template <typename T>
-string PaintTree(const T bt)
+string PaintBTree(T *bt)
 {
-	BPaintTree bpt;
+	PaintTree bpt;
 	ostringstream buf;
 
-	btreepainter::BuildBPaintTree<BTreeNode<string> >(bpt, bt);
-	Canvas paint(bpt->getData().getSubTreeWidth(),
-			bpt->getData().getSubTreeHeight());
-	paint.DrawBPaintTree(bpt);
+	BuildPaintTree<T>(bpt, bt);
+	Canvas paint(bpt->get_data().subtree_width_,
+			bpt->get_data().subtree_height_);
+	paint.DrawPaintTree(bpt);
+	DestoryPaintTree(bpt);
 	buf << paint;
 	return buf.str();
 }

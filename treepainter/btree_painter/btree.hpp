@@ -5,95 +5,128 @@
 #include <ostream>
 #include <sstream>
 #include <string>
+
 using std::endl;
 using std::string;
 using std::ostream;
 using std::ostringstream;
 
-namespace btreepainter
+namespace btree_painter
 {
+
+/** Binary tree node. */
 template<typename T>
 class BTreeNode
 {
 public:
-	BTreeNode() : left(NULL), right(NULL) { }
+	BTreeNode() : left_(NULL), right_(NULL) { }
 	BTreeNode(const T &data);
-	BTreeNode(const T &data, BTreeNode *_left, BTreeNode *_right);
+	BTreeNode(const T &data, BTreeNode *left, BTreeNode *right);
 	~BTreeNode() {};
 
-	string getName();
+	string get_name() const;
+	const BTreeNode *get_left() const { return left_; }
+	const BTreeNode *get_right() const { return right_; }
 
-	T &getData() { return data; }
-	/* BTreeNode *&getLeft() { return left; }
-	BTreeNode *&getRight() { return right; } */
-
-	/* void setLeft(const BTreeNode *l) { left = l; }
-	void setRight(const BTreeNode *r) { right = r; } */
-	void setData(const T &d) { data = d; }
+	T &get_data() { return data_; }
+	void set_data(const T &d) { data_ = d; }
 
 public:
-	BTreeNode *left;
-	BTreeNode *right;
+	/** Left child of this node. */
+	BTreeNode *left_;
+
+	/** Right child of this node. */
+	BTreeNode *right_;
 
 private:
-	T data;
+	/** The data storaged in this node. */
+	T data_;
 };
 
+/** Constructes a BTreeNode with data. */
 template <typename T>
-BTreeNode<T>::BTreeNode(const T &_data)
-	: data(_data), left(NULL), right(NULL)
+BTreeNode<T>::BTreeNode(const T &data)
+	: data_(data), left_(NULL), right_(NULL)
 {
 }
 
+/** Construct a BTreeNode with data, pointer of children. */
 template <typename T>
-BTreeNode<T>::BTreeNode(const T &_data, BTreeNode *_left, BTreeNode *_right)
-	: data(_data), left(_left), right(_right)
+BTreeNode<T>::BTreeNode(const T &data, BTreeNode *left, BTreeNode *right)
+	: data_(data), left_(left), right_(right)
 {
 }
 
+/** Returns the name of this node.
+ * The type of 'data' must override operator '<<' .
+ */
 template <typename T>
-string BTreeNode<T>::getName()
+string BTreeNode<T>::get_name() const
 {
 	ostringstream buf;
-	buf << data;
+	buf << data_;
 	return buf.str();
 }
 
+/** Actual implementation of operator '<<' override of binary tree.
+ *
+ * @tparam T @see BTreeNode
+ * @param os ostream&
+ * @param bt binary tree pointer
+ * @param level the level of node '*bt' in the binary tree
+ */
 template <typename T>
-void BTreeOutImpl(ostream &os, BTreeNode<T> &bt,
+void BTreeOutputImpl(ostream &os, BTreeNode<T> &bt,
 		const int level = 0)
 {
-	int i = 0, cur_level = level;
-	while (i++ < level)
+	int i = 0;
+	int cur_level = level;
+
+	// 1. print space in front of current node.
+	while (i < level)
 	{
 		os << "   ";
+		++i;
 	}
 
-	os << "-\"" << bt.getData() << "\""<< endl;
-	if (bt.left != NULL && bt.right != NULL)
+	// 2. print current node.
+	os << "-\"" << bt.get_data() << "\""<< endl;
+
+	// 3. print left and/or right subtree.
+	if (bt.left_ != NULL && bt.right_ != NULL)
 	{
-		BTreeOutImpl(os, *bt.left, level + 1);
-		BTreeOutImpl(os, *bt.right, level + 1);
+		BTreeOutputImpl(os, *bt.left_, level + 1);
+		BTreeOutputImpl(os, *bt.right_, level + 1);
 	}
-	else if (bt.left != NULL && bt.right == NULL)
+	else if (bt.left_ != NULL && bt.right_ == NULL)
 	{
-		BTreeOutImpl(os, *bt.left, level + 1);
-		os << "\n";
+		BTreeOutputImpl(os, *bt.left_, level + 1);
+		os << "\n";	// right subtree is empty
 	}
-	else if (bt.left == NULL && bt.right != NULL)
+	else if (bt.left_ == NULL && bt.right_ != NULL)
 	{
-		os << "\n";
-		BTreeOutImpl(os, *bt.right, level + 1);
+		os << "\n"; // left subtree is empty
+		BTreeOutputImpl(os, *bt.right_, level + 1);
 	}
 	else
 	{
+		// leaf node, do nothing in step 3
 	}
 }
 
+/** Overrides operator '<<' of BTreeNode.
+ *
+ * @tparam T @see BTreeNode
+ * @param os ostream&
+ * @param bt binary tree pointer
+ *
+ * @return ostream&
+ */
 template <typename T>
 ostream &operator<<(ostream &os, BTreeNode<T> &bt)
 {
-	BTreeOutImpl<T>(os, bt, 0);
+	BTreeOutputImpl<T>(os, bt,
+					0); // node 'bt' is level 0 in the binary tree
 	return os;
 }
 
